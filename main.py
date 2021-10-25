@@ -1,18 +1,30 @@
 import argparse
+import ctypes
 import os
+import traceback
+from pathlib import Path
 
-from db_temperature_distribution.parser import process_time_bins
+from db_temperature_distribution.parser import (
+    NoTemperatureDistribution,
+    process_time_bins,
+)
 
-if __name__ == '__main__':
+
+def show_message(title: str, text: str) -> None:
+    """Display native Windows information dialog."""
+    ctypes.windll.user32.MessageBoxW(0, text, title, 0)
+
+
+if __name__ == "__main__":
     energyplus_folder = os.path.expandvars(r"%LOCALAPPDATA%\DesignBuilder\EnergyPlus")
     parser = argparse.ArgumentParser(
         description="Read energyplus html output and export time bin tables."
     )
     parser.add_argument(
-        "--source-dir",
+        "--source-path",
         "-i",
         type=str,
-        help="Source directory containing 'eplustbl.htm' file.",
+        help="A path to energyplus .htm summary file.",
         required=False,
         default=energyplus_folder,
         nargs="?",
@@ -27,4 +39,13 @@ if __name__ == '__main__':
         nargs="?",
     )
     args = parser.parse_args()
-    process_time_bins(args.source_dir, args.dest_dir)
+    html_path = Path(args.source_path)
+    try:
+        process_time_bins(html_path, Path(args.dest_dir))
+    except IOError:
+        show_message("Information", traceback.format_exc())
+    except NoTemperatureDistribution:
+        show_message(
+            "Information",
+            f"File '{html_path}' does not include temperature distribution time bins.",
+        )
