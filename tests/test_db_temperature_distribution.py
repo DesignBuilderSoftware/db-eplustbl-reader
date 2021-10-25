@@ -3,7 +3,10 @@ from pathlib import Path
 
 import pytest
 
-from main import NoTemperatureDistribution, process_time_bins
+from db_temperature_distribution.parser import (
+    NoTemperatureDistribution,
+    process_time_bins,
+)
 
 
 def read_csv(path):
@@ -14,7 +17,12 @@ def read_csv(path):
 
 @pytest.fixture(scope="module", autouse=True)
 def parse_timebins(html_path, test_tempdir):
-    process_time_bins(html_path, test_tempdir)
+    return process_time_bins(html_path, test_tempdir)
+
+
+def test_file_paths(parse_timebins):
+    for path in parse_timebins:
+        assert path.exists()
 
 
 @pytest.mark.parametrize(

@@ -100,17 +100,20 @@ def format_time_bins(all_time_bins: Dict[str, Dict[str, Table]]) -> Dict[str, Ta
     return formatted_time_bins
 
 
-def write_tables(all_time_bins: Dict[str, Table], directory: Path) -> None:
+def write_tables(all_time_bins: Dict[str, Table], directory: Path) -> List[Path]:
     """Write time bins to a given directory."""
+    output_paths = []
     for temperature, time_bins in all_time_bins.items():
         filename = f"Distribution - {temperature}.csv"
         path = Path(directory, filename)
         with open(path, mode="w", newline="", encoding="utf-8") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerows(time_bins)
+        output_paths.append(path)
+    return output_paths
 
 
-def process_time_bins(html_path: Path, destination_dir: Path) -> None:
+def process_time_bins(html_path: Path, destination_dir: Path) -> List[Path]:
     """
     Read source html file and write parsed time bins to .csv.
 
@@ -126,8 +129,7 @@ def process_time_bins(html_path: Path, destination_dir: Path) -> None:
     time_bins_dict = find_time_bins(tables)
     if time_bins_dict:
         formatted_time_bins = format_time_bins(time_bins_dict)
-        write_tables(formatted_time_bins, destination_dir)
-    else:
-        raise NoTemperatureDistribution(
-            f"File '{html_path}' does not include temperature distribution time bins."
-        )
+        return write_tables(formatted_time_bins, destination_dir)
+    raise NoTemperatureDistribution(
+        f"File '{html_path}' does not include temperature distribution time bins."
+    )

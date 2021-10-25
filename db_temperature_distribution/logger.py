@@ -1,12 +1,25 @@
+"""Module to hold logging events."""
+
 import ctypes
 
 
 def show_message(title: str, text: str) -> None:
     """Display native Windows information dialog."""
-    ctypes.windll.user32.MessageBoxW(0, text, title, 0)
+    ctypes.windll.user32.MessageBoxW(0, str(text), str(title), 0)
 
 
 class Logger:
+    """
+    Handle error reporting.
+
+    Parameters
+    ----------
+    show_dialogs : bool
+        A flag to control error output stream, set True for native dialog,
+        False for console.
+
+    """
+
     def __init__(self, show_dialogs: bool):
         self.show_dialogs = show_dialogs
 
@@ -19,6 +32,7 @@ class Logger:
         return True
 
     def print_message(self, title: str, message: str) -> None:
+        """Report message to native dialog or console."""
         if self.show_dialogs:
             show_message(title, message)
         else:

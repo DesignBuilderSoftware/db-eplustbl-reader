@@ -16,7 +16,7 @@ if __name__ == "__main__":
         type=str,
         help="A path to energyplus .htm summary file.",
         required=False,
-        default=os.path.join(energyplus_folder, "eplustbl.html"),
+        default=os.path.join(energyplus_folder, "eplustbl.htm"),
         nargs="?",
     )
     parser.add_argument(
@@ -37,5 +37,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     html_path = Path(args.source_path)
     with Logger(show_dialogs=not args.no_dialogs) as logger:
-        process_time_bins(html_path, Path(args.dest_dir))
-        logger.print_message("Success!", "")
+        output_paths = process_time_bins(html_path, Path(args.dest_dir))
+        file_list = "\t-".join(map(str, output_paths))
+        message = f"Temperature distribution time bins are stored in:\n{file_list}"
+        logger.print_message("Success!", message)
