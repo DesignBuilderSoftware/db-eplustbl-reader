@@ -128,4 +128,6 @@ def process_time_bins(html_path: Path, destination_dir: Path) -> None:
         formatted_time_bins = format_time_bins(time_bins_dict)
         write_tables(formatted_time_bins, destination_dir)
     else:
-        raise NoTemperatureDistribution
+        raise NoTemperatureDistribution(
+            f"File '{html_path}' does not include temperature distribution time bins."
+        )
