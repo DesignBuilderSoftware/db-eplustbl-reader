@@ -53,12 +53,8 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
 
-      - name: Add poetry to path (MacOS)
-        if: ${{ matrix.os == 'macOS-latest' }}
-        run: echo "$HOME/Library/Python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
-
-      - name: Add poetry to path (Linux)
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+      - name: Add poetry to path (MacOS or Ubuntu)
+        if: ${{ matrix.os != 'windows-latest' }}
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure poetry
