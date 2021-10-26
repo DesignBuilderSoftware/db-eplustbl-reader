@@ -16,7 +16,7 @@ jobs:
     uses: voightp/github-actions/.github/workflows/run-linting.yml@main
     with:
       os: ubuntu-latest
-      python-version: 3.8
+      python-version: 3.9
   call-tests:
     uses: voightp/github-actions/.github/workflows/run-tests.yml@main
     with:
