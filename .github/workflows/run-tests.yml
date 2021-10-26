@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: linting
-        uses: ./.github/workflows/run-linting.yml
+        uses: voightp/github-actions/.github/workflows/run-linting.yml@main
         with:
           os: ubuntu-latest
           python-version: 3.8
