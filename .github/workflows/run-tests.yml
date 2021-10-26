@@ -41,12 +41,14 @@ jobs:
       - name: Get full python version
         id: full-python-version
         run: |
-          echo ::set-output name=version::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info[:3]))")
+          echo ::set-output name=VERSION::$(python -c "import sys; print('-'.join(str(v) for v in sys.version_info[:3]))")
 
       - name: Set up Poetry
         run: |
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 - -y
-          echo "$HOME/.poetry/bin" >> $GITHUB_PATH
+
+      - name: Add poetry to path
+        run: echo "$HOME/Library/Python/${{ steps.full-python-version.VERSION }}/bin" >> $GITHUB_PATH
 
       - name: Configure poetry
         run: poetry config virtualenvs.in-project true
