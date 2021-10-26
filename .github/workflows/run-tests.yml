@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -50,15 +50,15 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 - -y
 
       - name: Add poetry to path (Windows)
-        if: ${{ matrix.os }} == "windows-latest"
+        if: ${{ matrix.os == "windows-latest" }}
         run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
 
       - name: Add poetry to path (MacOS)
-        if: ${{ matrix.os }} == "macOS-latest"
+        if: ${{ matrix.os == "macOS-latest" }}
         run: echo "$HOME/Library/Python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
 
       - name: Add poetry to path (Linux)
-        if: ${{ matrix.os }} == "ubuntu-latest"
+        if: ${{ matrix.os == "ubuntu-latest" }}
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure poetry
