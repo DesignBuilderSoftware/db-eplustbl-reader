@@ -13,11 +13,12 @@ defaults:
 
 jobs:
   call-linting:
-    uses: voightp/github-actions/.github/workflows/run-linting.yml@main
+    uses: voightp/github-actions/.github/workflows/run-linting.yml@master
     with:
       os: ubuntu-latest
       python-version: 3.9
   call-tests:
-    uses: voightp/github-actions/.github/workflows/run-tests.yml@main
+    needs: call-linting
+    uses: voightp/github-actions/.github/workflows/run-tests.yml@master
     with:
       pytest-args: "tests/test_db_temperature_distribution.py -v"
