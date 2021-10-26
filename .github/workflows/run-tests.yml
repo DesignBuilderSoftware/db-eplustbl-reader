@@ -16,9 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        name: Checkout
-      - uses: ./.github/workflows/run-linting.yml
-        name: linting
+      - name: linting
+        uses: ./.github/workflows/run-linting.yml
         with:
           os: ubuntu-latest
           python-version: 3.8
