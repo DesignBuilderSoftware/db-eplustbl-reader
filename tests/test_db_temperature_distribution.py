@@ -42,7 +42,3 @@ def test_parsed_timebins(filename, expected_outputs, test_tempdir):
 def test_missing_timebins(html_path_no_bins, test_tempdir):
     with pytest.raises(NoTemperatureDistribution):
         process_time_bins(html_path_no_bins, test_tempdir)
-
-
-def test_fail():
-    assert False
