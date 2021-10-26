@@ -43,7 +43,7 @@ jobs:
         id: full-python-version
         run: |
           echo python -c "import sys; print('.'.join(str(v) for v in sys.version_info[:2]))"
-          echo python -c "import sys; print(sys.executable
+          echo python -c "import sys; print(sys.executable)"
 
       - name: Set up Poetry
         run: |
