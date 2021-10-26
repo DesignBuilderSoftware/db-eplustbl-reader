@@ -13,14 +13,10 @@ defaults:
 
 jobs:
   call-linting:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: linting
-        uses: voightp/github-actions/.github/workflows/run-linting.yml@main
-        with:
-          os: ubuntu-latest
-          python-version: 3.8
+    uses: voightp/github-actions/.github/workflows/run-linting.yml@main
+    with:
+      os: ubuntu-latest
+      python-version: 3.8
   tests:
     needs: call-linting
     runs-on: ${{ matrix.os }}
