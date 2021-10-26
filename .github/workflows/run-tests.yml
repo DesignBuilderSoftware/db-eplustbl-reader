@@ -13,7 +13,7 @@ defaults:
 
 jobs:
   call-linting:
-    uses: ./.github/workflows/run-linting.yml
+    uses: ./.github/workflows/run-linting.yml@v1
     with:
       os: "ubuntu-latest"
       python-version: 3.8
