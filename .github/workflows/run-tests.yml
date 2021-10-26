@@ -54,11 +54,11 @@ jobs:
 
       - name: Add poetry to path (MacOS)
         if: ${{ matrix.os }} == "macOS-latest"
-        run: echo "$HOME\Library\Python${{ matrix.python-version }}\bin" >> $GITHUB_PATH
+        run: echo "$HOME/Library/Python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
 
       - name: Add poetry to path (Linux)
         if: ${{ matrix.os }} == "ubuntu-latest"
-        run: echo "$HOME\.local/bin" >> $GITHUB_PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Configure poetry
         run: poetry config virtualenvs.in-project true
