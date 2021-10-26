@@ -13,13 +13,14 @@ defaults:
 
 jobs:
   call-linting:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: foo
-        uses: ./.github/workflows/run-linting.yml
+        name: Checkout
+      - uses: ./.github/workflows/run-linting.yml
+        name: linting
         with:
-          os: "ubuntu-latest"
+          os: ubuntu-latest
           python-version: 3.8
   tests:
     needs: call-linting
