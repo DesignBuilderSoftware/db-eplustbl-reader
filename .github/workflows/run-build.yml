@@ -49,7 +49,7 @@ jobs:
         run: poetry install
 
       - name: Test with pytest
-        run: poetry run pytest ${{ inputs.pytest-args }}
+        run: poetry run pytest tests/test_db_temperature_distribution.py -v
 
       - name: Build with Poetry
         run: |
