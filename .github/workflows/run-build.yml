@@ -52,10 +52,19 @@ jobs:
         run: poetry run pytest tests/test_db_temperature_distribution.py -v
 
       - name: Build with Poetry
-        run: |
-          poetry build
-          ls
-          ls dist
+        run: poetry build
+
+      - name: Get executable name
+        id: exe-name
+        run: echo "::set-output name=NAME::poetry version"
+
+      - name: Create executable with Pyinstaller
+        run: pyinstaller main.py --onefile --name ${{ steps.exe-name.outputs.NAME }}
+
+      - name: Test executable
+        run: pytest tests/test_executable.py -v
+
+
 
 
 
