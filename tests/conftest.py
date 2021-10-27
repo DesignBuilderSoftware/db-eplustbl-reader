@@ -1,3 +1,4 @@
+import importlib.metadata as importlib_metadata
 import json
 import shutil
 from pathlib import Path
@@ -39,7 +40,8 @@ def expected_outputs(test_files_dir):
 
 @pytest.fixture(scope="session")
 def exe_path(root_dir):
-    return Path(root_dir, "dist", "db-temperature-distribution.exe")
+    current_version = importlib_metadata.version("db_temperature_distribution")
+    return Path(root_dir, "dist", f"db-temperature-distribution {current_version}.exe")
 
 
 @pytest.fixture(scope="module")

@@ -70,7 +70,9 @@ jobs:
         run: pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
 
       - name: Test executable
-        run: pytest tests/test_executable.py -v
+        run: |
+          ls dist
+          pytest tests/test_executable.py -v
 
 
 
