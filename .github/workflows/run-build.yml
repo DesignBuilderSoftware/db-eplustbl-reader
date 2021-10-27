@@ -71,6 +71,7 @@ jobs:
 
       - name: Test executable
         run: |
+          ls -1 -d "$pwd/dist"*
           pytest tests/test_executable.py -v
 
 
