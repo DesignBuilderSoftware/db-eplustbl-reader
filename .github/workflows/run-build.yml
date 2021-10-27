@@ -71,7 +71,6 @@ jobs:
 
       - name: Test executable
         run: |
-          ls dist
           pytest tests/test_executable.py -v
 
 
