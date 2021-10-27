@@ -56,7 +56,15 @@ jobs:
 
       - name: Get executable name
         id: exe-name
-        run: echo "::set-output name=NAME::poetry version"
+        run: echo ::set-output name=NAME::"$(poetry version)"
+
+      - name: Add pyinstaller to path (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: echo ".venv/scripts" >> $GITHUB_PATH
+
+      - name: Add pyinstaller to path (MacOS or Ubuntu)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: echo ".venv/scripts" >> $GITHUB_PATH
 
       - name: Create executable with Pyinstaller
         run: pyinstaller main.py --onefile --name ${{ steps.exe-name.outputs.NAME }}
