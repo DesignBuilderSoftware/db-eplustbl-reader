@@ -62,7 +62,7 @@ jobs:
         id: my-tag
         run: echo ::set-output name=TAG::v$(poetry version -s)
 
-      name: Validate tag
+      - name: Validate tag
         run: exit 1
 
       - name: Add pyinstaller to path (Windows)
