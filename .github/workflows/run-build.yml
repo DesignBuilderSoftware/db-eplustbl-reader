@@ -75,7 +75,7 @@ jobs:
 
       - name: Get executable name
         id: exe-name
-        run: echo ::set-output name=NAME::$(python ./get_exe_name.py)
+        run: echo ::set-output name=NAME::$(python ./scripts/get_exe_name.py)
 
       - name: Add pyinstaller to path (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -86,7 +86,8 @@ jobs:
         run: echo ".venv/bin" >> $GITHUB_PATH
 
       - name: Create executable with Pyinstaller
-        run: pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
+        run: |
+          pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
 
       - name: Test executable
         run: |
