@@ -3,6 +3,8 @@
 name: Run Build
 on:
   push:
+    tags:
+      - v*.*.*
 
 defaults:
   run:
@@ -39,6 +41,26 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
 
+      - name: Get tag POETRY tag
+        id: poetry-tag
+        run: echo ::set-output name=TAG::v$(poetry version -s)
+
+      - name: Get GITHUB tag
+        id: git-tag
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/*/}
+
+      - name: Print tags
+        run: |
+          echo POETRY ${{ steps.poetry-tag.outputs.TAG }}
+          echo GIT ${{ steps.git-tag.outputs.TAG }}
+
+      - name: Validate tag
+        run: |
+          poetryTag="${{ steps.poetry-tag.outputs.TAG }}"
+          gitTag="${{ steps.git-tag.outputs.TAG }}"
+          python -c "import sys; eq='$poetryTag'!='$gitTag'; sys.exit(int(eq))"
+          exit $?
+
       - name: Set up cache
         uses: actions/cache@v2
         with:
@@ -57,13 +79,6 @@ jobs:
       - name: Get executable name
         id: exe-name
         run: echo ::set-output name=NAME::$(poetry version) - ${{ format(matrix.os) }}
-
-      - name: Get tag
-        id: my-tag
-        run: echo ::set-output name=TAG::v$(poetry version -s)
-
-      - name: Validate tag
-        run: exit 1
 
       - name: Add pyinstaller to path (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -90,7 +105,7 @@ jobs:
           removeArtifacts: false
           replaceArtifacts: true
           body: "Automatically generated release."
-          tag: ${{ steps.my-tag.outputs.TAG }}
+          tag: ${{ steps.poetry-tag.outputs.TAG }}
 
 
 
