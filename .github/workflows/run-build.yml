@@ -71,10 +71,15 @@ jobs:
 
       - name: Test executable
         run: |
-          cd dist
-          find "$(pwd)"
-          cd ..
           pytest tests/test_executable.py -v
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          body: "Automatically generated release."
 
 
 
