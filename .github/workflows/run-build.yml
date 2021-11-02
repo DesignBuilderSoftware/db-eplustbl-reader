@@ -1,0 +1,92 @@
+# This workflow builds wheel and executable.
+
+name: Run Build
+on:
+  push:
+    tags:
+      - v*.*
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [ 3.9 ]
+        os: [ windows-latest, macOS-latest, ubuntu-latest ]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Poetry
+        run: |
+          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 - -y
+
+      - name: Add poetry to path (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
+
+      - name: Add poetry to path (MacOS or Ubuntu)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Configure poetry
+        run: |
+          poetry config virtualenvs.in-project true
+
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Test with pytest
+        run: poetry run pytest tests/test_db_temperature_distribution.py -v
+
+      - name: Build with Poetry
+        run: poetry build
+
+      - name: Get executable name
+        id: exe-name
+        run: echo ::set-output name=NAME::$(poetry version)
+
+      - name: Add pyinstaller to path (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: echo ".venv/scripts" >> $GITHUB_PATH
+
+      - name: Add pyinstaller to path (MacOS or Ubuntu)
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: echo ".venv/bin" >> $GITHUB_PATH
+
+      - name: Create executable with Pyinstaller
+        run: pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
+
+      - name: Test executable
+        run: |
+          pytest tests/test_executable.py -v
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          body: "Automatically generated release."
+
+
+
+
+
+
+
+
