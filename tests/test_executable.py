@@ -10,8 +10,8 @@ def test_exe_exists(exe_path):
 
 @pytest.mark.parametrize("output", ["csv"])
 def test_exe(exe_path, html_path, test_tempdir, output):
-    command = f"'{exe_path}' -i '{html_path}' -o '{test_tempdir}' --no-dialogs"
-    subprocess.run(command, cwd=exe_path.parent)
+    command = f"{exe_path} -i {html_path} -o {test_tempdir} --no-dialogs"
+    subprocess.run(command, cwd=exe_path.parent, shell=True)
     for name in [
         "Distribution - ZONE MEAN AIR TEMPERATURE.csv",
         "Distribution - ZONE OPERATIVE TEMPERATURE.csv",
