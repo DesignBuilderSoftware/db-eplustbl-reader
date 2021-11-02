@@ -3,8 +3,6 @@
 name: Run Build
 on:
   push:
-    tags:
-      - v*.*
 
 defaults:
   run:
@@ -58,7 +56,14 @@ jobs:
 
       - name: Get executable name
         id: exe-name
-        run: echo ::set-output name=NAME::$(poetry version)
+        run: echo ::set-output name=NAME::$(poetry version) - ${{ format(matrix.os) }}
+
+      - name: Get tag
+        id: my-tag
+        run: echo ::set-output name=TAG::v$(poetry version -s)
+
+      name: Validate tag
+        run: exit 1
 
       - name: Add pyinstaller to path (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -81,7 +86,11 @@ jobs:
           artifacts: "dist/*"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
+          allowUpdates: true
+          removeArtifacts: false
+          replaceArtifacts: true
           body: "Automatically generated release."
+          tag: ${{ steps.my-tag.outputs.TAG }}
 
 
 
