@@ -4,7 +4,7 @@ name: Run Build
 on:
   push:
     tags:
-      - v*.*
+      - v*.*.*
 
 defaults:
   run:
@@ -41,6 +41,23 @@ jobs:
         run: |
           poetry config virtualenvs.in-project true
 
+      - name: Get tag POETRY tag
+        id: poetry-tag
+        run: echo ::set-output name=TAG::v$(poetry version -s)
+
+      - name: Get GITHUB tag
+        id: git-tag
+        run: echo ::set-output name=TAG::${GITHUB_REF#refs/*/}
+
+      - name: Validate tag
+        run: |
+          poetryTag=${{ steps.poetry-tag.outputs.TAG }}
+          gitTag=${{ steps.git-tag.outputs.TAG }}
+          echo POETRY $poetryTag
+          echo GIT $gitTag
+          python -c "import sys; eq='$poetryTag'!='$gitTag'; sys.exit(int(eq))"
+          exit $?
+
       - name: Set up cache
         uses: actions/cache@v2
         with:
@@ -58,7 +75,7 @@ jobs:
 
       - name: Get executable name
         id: exe-name
-        run: echo ::set-output name=NAME::$(poetry version)
+        run: echo ::set-output name=NAME::$(python ./scripts/get_exe_name.py)
 
       - name: Add pyinstaller to path (Windows)
         if: ${{ matrix.os == 'windows-latest' }}
@@ -69,7 +86,8 @@ jobs:
         run: echo ".venv/bin" >> $GITHUB_PATH
 
       - name: Create executable with Pyinstaller
-        run: pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
+        run: |
+          pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
 
       - name: Test executable
         run: |
@@ -81,7 +99,11 @@ jobs:
           artifacts: "dist/*"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
+          allowUpdates: true
+          removeArtifacts: false
+          replaceArtifacts: true
           body: "Automatically generated release."
+          tag: ${{ steps.poetry-tag.outputs.TAG }}
 
 
 

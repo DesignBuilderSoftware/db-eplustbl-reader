@@ -1,10 +1,11 @@
-import importlib.metadata as importlib_metadata
 import json
 import platform
 import shutil
 from pathlib import Path
 
 import pytest
+
+from scripts.get_exe_name import create_name
 
 
 @pytest.fixture(scope="session")
@@ -41,8 +42,8 @@ def expected_outputs(test_files_dir):
 
 @pytest.fixture(scope="session")
 def exe_path(root_dir):
-    current_version = importlib_metadata.version("db_temperature_distribution")
-    path = Path(root_dir, "dist", f"db-temperature-distribution {current_version}")
+    name = create_name()
+    path = Path(root_dir, "dist", name)
     if platform.system() == "Windows":
         path = Path(path.parent, f"{path.name}.exe")
     return path
