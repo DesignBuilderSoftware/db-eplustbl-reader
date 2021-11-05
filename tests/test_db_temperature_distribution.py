@@ -7,6 +7,7 @@ from db_temperature_distribution.parser import (
     NoTemperatureDistribution,
     process_time_bins,
 )
+from db_temperature_distribution.writer import write_tables
 
 
 def read_csv(path):
@@ -16,12 +17,17 @@ def read_csv(path):
 
 
 @pytest.fixture(scope="module", autouse=True)
-def parse_timebins(html_path, test_tempdir):
-    return process_time_bins(html_path, test_tempdir)
+def parse_timebins(html_path):
+    return process_time_bins(html_path)
 
 
-def test_file_paths(parse_timebins):
-    for path in parse_timebins:
+@pytest.fixture(scope="module", autouse=True)
+def write_timebins(parse_timebins, test_tempdir):
+    return write_tables(parse_timebins, test_tempdir)
+
+
+def test_file_paths(write_timebins):
+    for path in write_timebins:
         assert path.exists()
 
 
@@ -39,6 +45,6 @@ def test_parsed_timebins(filename, expected_outputs, test_tempdir):
     assert content == expected_outputs[filename]
 
 
-def test_missing_timebins(html_path_no_bins, test_tempdir):
+def test_missing_timebins(html_path_no_bins):
     with pytest.raises(NoTemperatureDistribution):
-        process_time_bins(html_path_no_bins, test_tempdir)
+        process_time_bins(html_path_no_bins)

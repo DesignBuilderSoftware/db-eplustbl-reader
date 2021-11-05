@@ -1,7 +1,6 @@
 """Define functions to extract and parse EnergyPlus temperature distribution."""
 
 
-import csv
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -100,20 +99,7 @@ def format_time_bins(all_time_bins: Dict[str, Dict[str, Table]]) -> Dict[str, Ta
     return formatted_time_bins
 
 
-def write_tables(all_time_bins: Dict[str, Table], directory: Path) -> List[Path]:
-    """Write time bins to a given directory."""
-    output_paths = []
-    for temperature, time_bins in all_time_bins.items():
-        filename = f"Distribution - {temperature}.csv"
-        path = Path(directory, filename)
-        with open(path, mode="w", newline="", encoding="utf-8") as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerows(time_bins)
-        output_paths.append(path)
-    return output_paths
-
-
-def process_time_bins(html_path: Path, destination_dir: Path) -> List[Path]:
+def process_time_bins(html_path: Path) -> Dict[str, Table]:
     """
     Read source html file and write parsed time bins to .csv.
 
@@ -121,15 +107,17 @@ def process_time_bins(html_path: Path, destination_dir: Path) -> List[Path]:
     ---------
     html_path : Path
         A path to energyplus html summary file.
-    destination_dir : Path
-        A path to directory to place output file / files.
+
+    Returns
+    -------
+    dict of {str, Table}
+        Processed time bins for all temperature types.
 
     """
     tables = read_html(html_path)
     time_bins_dict = find_time_bins(tables)
     if time_bins_dict:
-        formatted_time_bins = format_time_bins(time_bins_dict)
-        return write_tables(formatted_time_bins, destination_dir)
+        return format_time_bins(time_bins_dict)
     raise NoTemperatureDistribution(
         f"File '{html_path}' does not include temperature distribution time bins."
     )
