@@ -4,6 +4,7 @@ from pathlib import Path
 
 from db_temperature_distribution.logger import Logger
 from db_temperature_distribution.parser import process_time_bins
+from db_temperature_distribution.writer import write_tables
 
 if __name__ == "__main__":
     energyplus_folder = os.path.expandvars(r"%LOCALAPPDATA%\DesignBuilder\EnergyPlus")
@@ -37,7 +38,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     html_path = Path(args.source_path)
     with Logger(show_dialogs=not args.no_dialogs) as logger:
-        output_paths = process_time_bins(html_path, Path(args.dest_dir))
+        parsed_time_bins = process_time_bins(html_path)
+        output_paths = write_tables(parsed_time_bins, Path(args.dest_dir))
         file_list = "\t-".join(map(str, output_paths))
         message = f"Temperature distribution time bins are stored in:\n{file_list}"
         logger.print_message("Success!", message)
