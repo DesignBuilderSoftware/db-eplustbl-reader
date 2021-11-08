@@ -1,7 +1,7 @@
 {
-  "Distribution - ZONE MEAN AIR TEMPERATURE.csv": [
+  "Distribution ZONE MEAN AIR TEMPERATURE.csv": [
     [
-      "zone",
+      "",
       "less than 12.0",
       "12.00-12.99",
       "13.00-13.99",
@@ -79,9 +79,9 @@
       "3132.0"
     ]
   ],
-  "Distribution - ZONE OPERATIVE TEMPERATURE.csv": [
+  "Distribution ZONE OPERATIVE TEMPERATURE.csv": [
     [
-      "zone",
+      "",
       "less than 12.0",
       "12.00-12.99",
       "13.00-13.99",
@@ -159,9 +159,9 @@
       "3132.0"
     ]
   ],
-  "Distribution - ZONE MEAN RADIANT TEMPERATURE.csv": [
+  "Distribution ZONE MEAN RADIANT TEMPERATURE.csv": [
     [
-      "zone",
+      "",
       "less than 12.0",
       "12.00-12.99",
       "13.00-13.99",

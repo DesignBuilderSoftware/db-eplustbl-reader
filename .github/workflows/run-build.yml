@@ -1,6 +1,6 @@
 # This workflow builds wheel and executable.
 
-name: Run Build
+name: Package
 on:
   push:
     tags:
@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ 3.9 ]
-        os: [ windows-latest, macOS-latest, ubuntu-latest ]
+        os: [ ubuntu-latest ]
       fail-fast: false
     steps:
       - uses: actions/checkout@v2
@@ -68,32 +68,12 @@ jobs:
         run: poetry install
 
       - name: Test with pytest
-        run: poetry run pytest tests/test_db_temperature_distribution.py -v
+        run: poetry run pytest tests -v
 
       - name: Build with Poetry
         run: poetry build
 
-      - name: Get executable name
-        id: exe-name
-        run: echo ::set-output name=NAME::$(python ./scripts/get_exe_name.py)
-
-      - name: Add pyinstaller to path (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: echo ".venv/scripts" >> $GITHUB_PATH
-
-      - name: Add pyinstaller to path (MacOS or Ubuntu)
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: echo ".venv/bin" >> $GITHUB_PATH
-
-      - name: Create executable with Pyinstaller
-        run: |
-          pyinstaller main.py --onefile --name "${{ steps.exe-name.outputs.NAME }}"
-
-      - name: Test executable
-        run: |
-          pytest tests/test_executable.py -v
-
-      - name: Create release
+      - name: Create package
         uses: ncipollo/release-action@v1
         with:
           artifacts: "dist/*"

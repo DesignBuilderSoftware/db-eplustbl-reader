@@ -1,6 +1,6 @@
 # This workflow will run a test suite.
 
-name: Run Tests
+name: Tests
 on:
   pull_request:
     branches:
@@ -20,4 +20,4 @@ jobs:
     needs: call-linting
     uses: voightp/github-actions/.github/workflows/run-tests.yml@master
     with:
-      pytest-args: "tests/test_db_temperature_distribution.py -v"
+      pytest-args: "tests -v"

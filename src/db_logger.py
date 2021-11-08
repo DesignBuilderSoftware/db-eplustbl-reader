@@ -1,4 +1,4 @@
-"""Module to hold logging events."""
+"""Module to manage logging events."""
 
 import ctypes
 

@@ -1,19 +1,18 @@
 """Define functions to extract and parse EnergyPlus temperature distribution."""
-
-
+import os
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from eppy.results import readhtml
+
+from db_logger import Logger
+from db_table import DbTable, RawTable
 
 
 class NoTemperatureDistribution(Exception):
     """Raised when input html file does not include time bins."""
-
-
-Table = List[List[Union[str, float]]]
 
 
 def read_html(path: Path) -> List[List[Any]]:
@@ -25,7 +24,7 @@ def read_html(path: Path) -> List[List[Any]]:
     return tables
 
 
-def find_time_bins(html_tables: List[List[Any]]) -> Dict[str, Dict[str, Table]]:
+def find_time_bins(html_tables: List[List[Any]]) -> Dict[str, Dict[str, RawTable]]:
     """Extract 'time bins' from all html tables."""
     time_bins = defaultdict(dict)
     for lines, table in html_tables:
@@ -37,23 +36,23 @@ def find_time_bins(html_tables: List[List[Any]]) -> Dict[str, Dict[str, Table]]:
     return time_bins
 
 
-def strip_characters(text: str, *args: str):
+def strip_characters(text: str, *args: str) -> str:
     """Remove specified characters from given text."""
     for char in args:
         text = text.replace(char, "")
     return text
 
 
-def parse_header_row(time_bin_table):
+def parse_header_row(time_bin_table: RawTable) -> List[str]:
     """Merge information from interval information rows."""
     header_row = []
     joined_rows = list(zip(time_bin_table[1], time_bin_table[2]))
     n_rows = len(joined_rows)
     for i, (first, second) in enumerate(joined_rows):
         if i == 0:
-            # use 'zone' instead of 'Interval Start - Interval End'
-            item = "zone"
-        elif i == (n_rows - 1):
+            # skip first item as this is in place in index
+            continue
+        if i == (n_rows - 1):
             # use 'total' instead of 'Total - Row'
             item = "total"
         elif i in (1, n_rows - 2):
@@ -69,37 +68,38 @@ def parse_header_row(time_bin_table):
     return header_row
 
 
-def create_header_row(time_bin_tables: Dict[str, Table]) -> List[str]:
+def create_header_row(time_bin_tables: Dict[str, RawTable]) -> List[str]:
     """Create formatted first spreadsheet row."""
     header_row = None
-    for _, table in time_bin_tables.items():
-        current_header_row = parse_header_row(table)
+    for _, raw_table in time_bin_tables.items():
+        current_header_row = parse_header_row(raw_table)
         if header_row and header_row != current_header_row:
             raise ValueError("Table headers differ! Cannot generate time bins.")
         header_row = current_header_row
     return header_row
 
 
-def create_values_row(zone_name: str, time_bin_table: Table) -> List[Union[str, float]]:
+def create_values_row(time_bin_table: RawTable) -> List[float]:
     """Create spreadsheet values row."""
     values_row = time_bin_table[-1]
-    values_row[0] = zone_name
-    return values_row
+    return values_row[1:]
 
 
-def format_time_bins(all_time_bins: Dict[str, Dict[str, Table]]) -> Dict[str, Table]:
+def format_time_bins(raw_time_bins: Dict[str, Dict[str, RawTable]]) -> List[DbTable]:
     """Extract only time bin 'totals' (filter irrelevant rows)."""
-    formatted_time_bins = {}
-    for temperature, time_bins in all_time_bins.items():
-        formatted_table = [create_header_row(time_bins)]
-        for zone_name, table in time_bins.items():
-            values_row = create_values_row(zone_name, table)
-            formatted_table.append(values_row)
-        formatted_time_bins[temperature] = formatted_table
+    formatted_time_bins = []
+    for temperature, time_bins in raw_time_bins.items():
+        db_table = DbTable(f"Distribution {temperature}")
+        db_table.header = create_header_row(time_bins)
+        for table in time_bins.values():
+            values_row = create_values_row(table)
+            db_table.append_row(values_row)
+        db_table.index = list(time_bins.keys())
+        formatted_time_bins.append(db_table)
     return formatted_time_bins
 
 
-def process_time_bins(html_path: Path) -> Dict[str, Table]:
+def process_time_bins(html_path: Path) -> List[DbTable]:
     """
     Read source html file and write parsed time bins to .csv.
 
@@ -110,7 +110,7 @@ def process_time_bins(html_path: Path) -> Dict[str, Table]:
 
     Returns
     -------
-    dict of {str, Table}
+    list of DbTable
         Processed time bins for all temperature types.
 
     """
@@ -121,3 +121,11 @@ def process_time_bins(html_path: Path) -> Dict[str, Table]:
     raise NoTemperatureDistribution(
         f"File '{html_path}' does not include temperature distribution time bins."
     )
+
+
+if __name__ == "__main__":
+    energyplus_folder = os.path.expandvars(r"%LOCALAPPDATA%\DesignBuilder\EnergyPlus")
+    default_html = Path(energyplus_folder, "eplustbl.htm")
+    with Logger(show_dialogs=True) as logger:
+        parsed_time_bins = process_time_bins(default_html)
+        logger.print_message("Success!", "Bins successfully extracted.")
