@@ -1,11 +1,7 @@
-import json
-import platform
 import shutil
 from pathlib import Path
 
 import pytest
-
-from scripts.get_exe_name import create_name
 
 
 @pytest.fixture(scope="session")
@@ -31,22 +27,6 @@ def html_path(test_files_dir):
 @pytest.fixture(scope="session")
 def html_path_no_bins(test_files_dir):
     return Path(test_files_dir, "eplustbl(Filtered).htm")
-
-
-@pytest.fixture(scope="session")
-def expected_outputs(test_files_dir):
-    with open(Path(test_files_dir, "expected_outputs.json")) as json_file:
-        content = json.load(json_file)
-    return content
-
-
-@pytest.fixture(scope="session")
-def exe_path(root_dir):
-    name = create_name()
-    path = Path(root_dir, "dist", name)
-    if platform.system() == "Windows":
-        path = Path(path.parent, f"{path.name}.exe")
-    return path
 
 
 @pytest.fixture(scope="module")
