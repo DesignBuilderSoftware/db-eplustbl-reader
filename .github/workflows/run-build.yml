@@ -1,4 +1,4 @@
-# This workflow builds wheel and executable.
+# This workflow builds and uploads package.
 
 name: Package
 on:
@@ -11,80 +11,16 @@ defaults:
     shell: bash
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        python-version: [ 3.9 ]
-        os: [ ubuntu-latest ]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Set up Poetry
-        run: |
-          curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 - -y
-
-      - name: Add poetry to path (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: echo "$APPDATA\Python\Scripts" >> $GITHUB_PATH
-
-      - name: Add poetry to path (MacOS or Ubuntu)
-        if: ${{ matrix.os != 'windows-latest' }}
-        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Configure poetry
-        run: |
-          poetry config virtualenvs.in-project true
-
-      - name: Get tag POETRY tag
-        id: poetry-tag
-        run: echo ::set-output name=TAG::v$(poetry version -s)
-
-      - name: Get GITHUB tag
-        id: git-tag
-        run: echo ::set-output name=TAG::${GITHUB_REF#refs/*/}
-
-      - name: Validate tag
-        run: |
-          poetryTag=${{ steps.poetry-tag.outputs.TAG }}
-          gitTag=${{ steps.git-tag.outputs.TAG }}
-          echo POETRY $poetryTag
-          echo GIT $gitTag
-          python -c "import sys; eq='$poetryTag'!='$gitTag'; sys.exit(int(eq))"
-          exit $?
-
-      - name: Set up cache
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Test with pytest
-        run: poetry run pytest tests -v
-
-      - name: Build with Poetry
-        run: poetry build
-
-      - name: Create package
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "dist/*"
-          token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          allowUpdates: true
-          removeArtifacts: false
-          replaceArtifacts: true
-          body: "Automatically generated release."
-          tag: ${{ steps.poetry-tag.outputs.TAG }}
-
+  call-tests:
+    uses: voightp/github-actions/.github/workflows/run-tests.yml@master
+    with:
+      pytest-args: "tests -v"
+  call-build:
+    needs: call-tests
+    uses: voightp/github-actions/.github/workflows/run-build.yml@master
+    with:
+      matrix: "[ 'ubuntu-latest', 'windows-latest', 'macOS-latest' ]"
+      python-version: 3.9
 
 
 
