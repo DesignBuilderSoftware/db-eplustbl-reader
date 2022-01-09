@@ -21,4 +21,4 @@ jobs:
     uses: voightp/github-actions/.github/workflows/run-tests.yml@master
     with:
       pytest-args: "tests -v"
-      poetry-install-args: "--version 1.1.11""
+      poetry-install-args: "--version 1.1.11"
