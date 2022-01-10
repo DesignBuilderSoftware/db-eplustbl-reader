@@ -21,10 +21,3 @@ jobs:
     with:
       matrix: "[ 'ubuntu-latest', 'windows-latest', 'macOS-latest' ]"
       python-version: 3.9
-
-
-
-
-
-
-
