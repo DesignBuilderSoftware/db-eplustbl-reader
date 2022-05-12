@@ -9,6 +9,7 @@ from eppy.results import readhtml
 
 from db_logger import Logger
 from db_table import DbTable, RawTable
+from db_writer import DbWriter
 
 
 class NoTemperatureDistribution(Exception):
@@ -124,8 +125,17 @@ def process_time_bins(html_path: Path) -> List[DbTable]:
 
 
 if __name__ == "__main__":
-    energyplus_folder = os.path.expandvars(r"%LOCALAPPDATA%\DesignBuilder\EnergyPlus")
+    energyplus_folder = Path(
+        os.path.expandvars(r"%LOCALAPPDATA%\DesignBuilder\EnergyPlus")
+    )
     default_html = Path(energyplus_folder, "eplustbl.htm")
     with Logger(show_dialogs=True) as logger:
         parsed_time_bins = process_time_bins(default_html)
-        logger.print_message("Success!", "Bins successfully extracted.")
+        DbWriter.write_tables(parsed_time_bins, energyplus_folder)
+        table_names = "\n - ".join([table.name for table in parsed_time_bins])
+        logger.print_message(
+            "Success!",
+            f"Bins successfully extracted."
+            f"\nOutput files:\n - {table_names}"
+            f"\nare located in: {energyplus_folder}.",
+        )
